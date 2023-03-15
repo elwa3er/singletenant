@@ -1,0 +1,87 @@
+datasource postgres {
+  provider = "postgresql"
+  url      = env("POSTGRESQL_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator prismaCRUDGenerator {
+  provider = "npx prisma-generator-crud"
+  output   = "./generated"
+}
+
+model User {
+  id        String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+  firstName String?
+  lastName  String?
+  username  String    @unique
+  password  String?
+  isValid   Boolean?
+  roles     String[]
+}
+
+model AppConfig {
+  id        String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+  value     String?
+  key       String?   @unique
+}
+
+model Order {
+  id         String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime? @updatedAt
+  deletedAt  DateTime?
+  quantity   Int?
+  discount   Float?
+  totalPrice Int?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  customerId String?
+  product    Product?  @relation(fields: [productId], references: [id])
+  productId  String?
+}
+
+model Customer {
+  id        String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+  firstName String?
+  lastName  String?
+  email     String?
+  phone     String?
+  orders    Order[]
+  address   Address?  @relation(fields: [addressId], references: [id])
+  addressId String?
+}
+
+model Address {
+  id        String     @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime   @default(now())
+  updatedAt DateTime?  @updatedAt
+  deletedAt DateTime?
+  address_1 String?
+  address_2 String?
+  city      String?
+  state     String?
+  zip       Int?
+  customers Customer[]
+}
+
+model Product {
+  id          String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+  deletedAt   DateTime?
+  name        String?
+  itemPrice   Float?
+  description String?
+  orders      Order[]
+}
